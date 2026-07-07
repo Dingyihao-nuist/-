@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd frontend && npm *)",
+      "Bash(cd backend && *)",
+      "Bash(mkdir *)",
+      "Bash(xcopy *)",
+      "Bash(copy *)",
+      "Bash(rm *)",
+      "Bash(rmdir *)"
+    ]
+  }
+}

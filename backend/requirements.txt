@@ -1,0 +1,40 @@
+# Web 框架
+fastapi>=0.115,<0.116
+uvicorn[standard]>=0.34,<0.35
+python-multipart>=0.0.9
+
+# 数据库
+sqlalchemy[asyncio]>=2.0,<3.0
+aiosqlite>=0.20,<1.0
+
+# 认证
+python-jose[cryptography]>=3.3,<4.0
+passlib[bcrypt]>=1.7,<2.0
+
+# LangChain 生态
+langchain>=0.3,<0.4
+langchain-core>=0.3,<0.4
+langchain-openai>=0.3,<0.4
+langchain-chroma>=0.2,<0.3
+langchain-huggingface>=0.1,<0.2
+
+# RAG 组件
+chromadb>=0.5,<0.6
+sentence-transformers>=3.0,<4.0
+tiktoken>=0.7
+
+# 文档解析
+pypdf2>=3.0,<4.0
+python-docx>=1.1,<2.0
+openpyxl>=3.1,<4.0
+unstructured>=0.16,<0.17
+markdown>=3.7
+
+# 工具
+pydantic-settings>=2.0,<3.0
+python-dotenv>=1.0,<2.0
+slowapi>=0.1,<0.2
+structlog>=24.0
+
+# 导出
+weasyprint>=62.0,<63.0
