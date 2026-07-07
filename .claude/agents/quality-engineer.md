@@ -108,3 +108,51 @@ skills:
 - **误报排除**：检查后二次确认，排除测试文件、mock 数据、第三方代码
 - **修复导向**：每个问题附带具体行号和可执行的修复代码
 - **增量审查**：支持只检查 git diff 变更部分，避免全量扫描噪音
+
+## 输出标记文件（必须执行）
+
+质量审查全部完成后，**必须**将结果写入 `.claude/artifacts/quality-result.json`。
+
+### 评分公式
+```
+总分 = security.score × 0.35 + comments.score × 0.25 + error_handling.score × 0.20
+     + robustness.score × 0.10 + code_standards.score × 0.10
+```
+（dependencies 维度发现问题会影响总分，但 weight = 0，不直接计入）
+
+### 判断标准
+- `status: "pass"` — 总分 ≥ 70 且 security.critical_count == 0
+- `status: "fail"` — 总分 < 70 或存在严重安全漏洞（critical_count > 0）
+
+### 操作步骤
+1. 确保目录存在：`mkdir -p .claude/artifacts`
+2. 获取当前时间：运行 `date -Iseconds`
+3. 将以下 JSON 写入 `.claude/artifacts/quality-result.json`：
+
+```json
+{
+  "agent": "quality-engineer",
+  "timestamp": "<ISO8601时间>",
+  "status": "<pass 或 fail>",
+  "overall_score": <0-100>,
+  "pass_threshold": 70,
+  "dimensions": {
+    "security":        { "score": <N>, "weight": 35, "issues_count": <N>, "critical_count": <N> },
+    "comments":        { "score": <N>, "weight": 25, "issues_count": <N>, "critical_count": 0 },
+    "error_handling":  { "score": <N>, "weight": 20, "issues_count": <N>, "critical_count": 0 },
+    "robustness":      { "score": <N>, "weight": 10, "issues_count": <N>, "critical_count": 0 },
+    "code_standards":  { "score": <N>, "weight": 10, "issues_count": <N>, "critical_count": 0 },
+    "dependencies":    { "score": <N>, "weight": 0,  "issues_count": <N>, "critical_count": 0 }
+  },
+  "critical_issues": [
+    { "dimension": "<维度>", "file": "<文件路径>", "line": <行号>, "severity": "critical", "description": "<描述>" }
+  ],
+  "files_checked": <文件数>,
+  "duration_seconds": <秒数>
+}
+```
+
+### 重要提醒
+- `critical_issues` 只列出 severity 为 "critical" 的问题（即 🔴 严重级别）
+- 如果 marker 文件已存在，覆盖更新
+- 如果是作为 gitcommit-agent 子代理被调用，执行完成后直接写 marker 即可

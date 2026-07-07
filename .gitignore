@@ -44,5 +44,8 @@ frontend/dist/
 # ChromaDB
 chroma/
 
+# Claude Code 运行时产物
+.claude/artifacts/
+
 # 上传文件
 uploads/
