@@ -49,3 +49,8 @@ chroma/
 
 # 上传文件
 uploads/
+
+# 压测数据 & 报告
+backend/tests/load/data/
+backend/tests/load/reports/
+report.html

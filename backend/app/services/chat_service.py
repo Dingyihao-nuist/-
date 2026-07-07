@@ -129,7 +129,7 @@ async def stream_chat(
     )
     history_messages = list(result.scalars().all())[::-1]  # 反转回正序
 
-    # 保存用户消息
+    # 保存用户消息并立即提交（释放写锁，避免 SSE 流期间长期持有）
     user_msg = Message(session_id=session_id, role="user", content=question)
     db.add(user_msg)
     await db.flush()
@@ -142,6 +142,10 @@ async def stream_chat(
         else:
             session.title = "无标题对话"
         await db.flush()
+
+    # 立即提交用户消息和标题，释放 SQLite 写锁
+    # 后续 RAG 检索 + LLM 流式生成期间不再持有写锁
+    await db.commit()
 
     # 收集完整回答和来源
     full_answer = ""
@@ -160,7 +164,7 @@ async def stream_chat(
             yield f"event: sources\ndata: {json.dumps({'type': 'sources', 'sources': sources})}\n\n"
 
         elif event_type == "done":
-            # 保存 AI 消息
+            # 保存 AI 消息并立即提交
             ai_msg = Message(
                 session_id=session_id,
                 role="assistant",
@@ -177,6 +181,9 @@ async def stream_chat(
                 .where(Session.id == session_id)
                 .values(updated_at=func.now())
             )
+
+            # 提交 AI 消息，完成本次问答的全部数据库工作
+            await db.commit()
 
             yield f"event: done\ndata: {json.dumps({'type': 'done', 'message_id': ai_msg.id})}\n\n"
 
